@@ -11,6 +11,7 @@ $LANG = array(
 'L_CATEGORY'		=> 'category',
 'L_PAGE'			=> 'page',
 'L_ERROR'			=> 'error',
+'L_BLOG'			=> 'blog'
 
 );
 

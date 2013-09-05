@@ -16,11 +16,11 @@ class plxMyBreadcrumb extends plxPlugin {
 	 **/
 	public function __construct($default_lang) {
 
-        # appel du constructeur de la classe plxPlugin (obligatoire)
-        parent::__construct($default_lang);
+		# appel du constructeur de la classe plxPlugin (obligatoire)
+		parent::__construct($default_lang);
 
 		$this->addHook('MyBreadcrumb', 'MyBreadcrumb');
-    }
+	}
 
 	public static function formatLink($href, $name, $link=false, $title='', $class='') {
 
@@ -33,14 +33,19 @@ class plxMyBreadcrumb extends plxPlugin {
 
 	}
 
-    public function MyBreadcrumb() {
+	public function MyBreadcrumb() {
 		echo '
 		<?php
 			# pages
 			preg_match("/\/?page([0-9]+)$/",$plxShow->plxMotor->get,$pages);
 			# home
-			$url = "index.php?";
-			$breadcrumb[] = plxMyBreadcrumb::formatLink($plxShow->plxMotor->urlRewrite($url), "'.$this->getLang('L_HOMEPAGE').'", true, "'.$this->getLang('L_HOMEPAGE').' ".$plxShow->plxMotor->aConf["title"], "first");
+			if($plxShow->plxMotor->get=="blog") {
+				$url = "?blog";
+				$breadcrumb[] = plxMyBreadcrumb::formatLink($plxShow->plxMotor->urlRewrite($url), "'.$this->getLang('L_BLOG').'", true, "'.$this->getLang('L_BLOG').' ".$plxShow->plxMotor->aConf["title"], "first");
+			} else {
+				$url = "?";
+				$breadcrumb[] = plxMyBreadcrumb::formatLink($plxShow->plxMotor->urlRewrite($url), "'.$this->getLang('L_HOMEPAGE').'", true, "'.$this->getLang('L_HOMEPAGE').' ".$plxShow->plxMotor->aConf["title"], "first");
+			}
 			# traitement des différents modes
 			switch($plxShow->mode()) {
 				case "categorie":
@@ -51,13 +56,15 @@ class plxMyBreadcrumb extends plxPlugin {
 					$breadcrumb[] = plxMyBreadcrumb::formatLink($plxShow->plxMotor->urlRewrite($url), $name, isset($pages[1]));
 					break;
 				case "static":
-					$breadcrumb[] = "'.$this->getLang('L_STATIC').'";
 					$id = $plxShow->plxMotor->cible;
-					$group = $plxShow->plxMotor->aStats[$id]["group"];
-					if(!empty($group)) $breadcrumb[] = $group;
-					$name = $plxShow->plxMotor->aStats[$id]["name"];
-					$url = "?static".intval($id)."/".$plxShow->plxMotor->aStats[$id]["url"];
-					$breadcrumb[] = plxMyBreadcrumb::formatLink($plxShow->plxMotor->urlRewrite($url), $name);
+					if($id!=$plxShow->plxMotor->aConf["homestatic"]) {
+						$breadcrumb[] = "'.$this->getLang('L_STATIC').'";
+						$group = $plxShow->plxMotor->aStats[$id]["group"];
+						if(!empty($group)) $breadcrumb[] = $group;
+						$name = $plxShow->plxMotor->aStats[$id]["name"];
+						$url = "?static".intval($id)."/".$plxShow->plxMotor->aStats[$id]["url"];
+						$breadcrumb[] = plxMyBreadcrumb::formatLink($plxShow->plxMotor->urlRewrite($url), $name);
+					}
 					break;
 				case "tags":
 					$breadcrumb[] = "'.$this->getLang('L_TAG').'";
@@ -98,12 +105,13 @@ class plxMyBreadcrumb extends plxPlugin {
 						$breadcrumb[] = plxMyBreadcrumb::formatLink("", $plxShow->plxMotor->aStats[$plxShow->plxMotor->cible]["name"]);
 					}
 			}
+
 			# n° de page
 			if(isset($pages[1])) {
 				$url .= "/page".$pages[1];
 				$breadcrumb[] = plxMyBreadcrumb::formatLink($plxShow->plxMotor->urlRewrite($url), "'.$this->getLang('L_PAGE').' ".$pages[1]);
 			}
-			
+
 			echo "'.$this->getLang('L_HERE').' : ";
 			echo implode("<span class=\"sep\">&nbsp;&#187;&nbsp;</span>", $breadcrumb)
 
